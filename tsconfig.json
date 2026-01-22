@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "forceConsistentCasingInFileNames": true,
+    "target": "ES2022",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "outDir": "./dist",
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "types": [ "node"],
+    
+   
+    // "jsx": "react-jsx",
+    // "jsxImportSource": "hono/jsx",
+  },
+
+"include": [
+  
+  "src/**/*"
+],
+"exclude": [
+  "node_modules",
+  "dist"
+]
+}
