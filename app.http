@@ -1,0 +1,104 @@
+### Health Check / API Info
+GET http://localhost:4000/paystack
+
+### Initialize Payment
+POST http://localhost:4000/paystack/initialize
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "amount": 3000,
+  "currency": "KES",
+  "metadata": {
+    "custom_fields": [
+      {
+        "display_name": "Customer Name",
+        "variable_name": "customer_name",
+        "value": "John Doe"
+      }
+    ]
+  }
+}
+
+### Verify Payment (Replace REFERENCE with actual reference from initialize response)
+POST http://localhost:4000/paystack/verify
+Content-Type: application/json
+
+{
+  "reference": "tl3dk4bo65"
+}
+
+### Test Verify Payment with Invalid Reference
+POST http://localhost:4000/paystack/verify
+Content-Type: application/json
+
+{
+  "reference": "invalid_reference_12345"
+}
+
+### Test Initialize Payment - Missing Email
+POST http://localhost:4000/paystack/initialize
+Content-Type: application/json
+
+{
+  "amount": 3000
+}
+
+### Test Initialize Payment - Missing Amount
+POST http://localhost:4000/paystack/initialize
+Content-Type: application/json
+
+{
+  "email": "user@example.com"
+}
+
+### Get Payment by Reference
+GET http://localhost:4000/paystack/payment/tl3dk4bo65
+
+### Get All Payments (with pagination)
+GET http://localhost:4000/paystack/payments?limit=10&offset=0
+
+### Get All Payments - Default (50 items)
+GET http://localhost:4000/paystack/payments
+
+### Test Initialize Payment - Invalid Email Format
+POST http://localhost:4000/paystack/initialize
+Content-Type: application/json
+
+{
+  "email": "invalid-email",
+  "amount": 3000
+}
+
+### Test Initialize Payment - Invalid Amount (negative)
+POST http://localhost:4000/paystack/initialize
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "amount": -100
+}
+
+### Test Initialize Payment - Invalid Amount (zero)
+POST http://localhost:4000/paystack/initialize
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "amount": 0
+}
+
+### Webhook Test (Paystack will send POST requests here)
+POST http://localhost:4000/webhook/paystack
+Content-Type: application/json
+x-paystack-signature: test_signature
+
+{
+  "event": "charge.success",
+  "data": {
+    "reference": "test_reference",
+    "amount": 300000,
+    "currency": "KES",
+    "status": "success"
+  }
+}
