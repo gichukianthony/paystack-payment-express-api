@@ -107,9 +107,20 @@ router.get("/payment/:reference", async (req, res) => {
     });
   } catch (error: any) {
     console.error("Get payment error:", error);
+    
+    // Check if it's a database connection error
+    if (error.code === '42P01' || error.message?.includes('does not exist')) {
+      return res.status(500).json({
+        success: false,
+        message: "Database tables not found. Please run: pnpm run db:setup",
+        error: "Tables need to be created"
+      });
+    }
+    
     res.status(500).json({
       success: false,
       message: "Failed to retrieve payment",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 });
@@ -141,9 +152,20 @@ router.get("/payments", async (req, res) => {
     });
   } catch (error: any) {
     console.error("Get payments error:", error);
+    
+    // Check if it's a database connection error
+    if (error.code === '42P01' || error.message?.includes('does not exist')) {
+      return res.status(500).json({
+        success: false,
+        message: "Database tables not found. Please run: pnpm run db:setup",
+        error: "Tables need to be created"
+      });
+    }
+    
     res.status(500).json({
       success: false,
       message: "Failed to retrieve payments",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 });
@@ -190,19 +212,25 @@ router.post("/verify", async (req, res) => {
     }
 
     // Check if payment already exists
-    const existingPayments = await db
-      .select()
-      .from(payments)
-      .where(eq(payments.reference, reference))
-      .limit(1);
+    try {
+      const existingPayments = await db
+        .select()
+        .from(payments)
+        .where(eq(payments.reference, reference))
+        .limit(1);
 
-    if (existingPayments.length === 0) {
-      await db.insert(payments).values({
-        reference,
-        amount: data.amount,
-        currency: data.currency,
-        status: "success",
-      });
+      if (existingPayments.length === 0) {
+        await db.insert(payments).values({
+          reference,
+          amount: data.amount,
+          currency: data.currency,
+          status: "success",
+        });
+      }
+    } catch (dbError: any) {
+      // Log database error but don't fail the verification
+      console.error("Database error during payment save:", dbError);
+      // Continue with successful verification response
     }
 
     res.json({ 
