@@ -533,4 +533,4 @@ For issues and questions:
 
 ---
 
-**Made with ❤️ for Paystack Integration**
+
