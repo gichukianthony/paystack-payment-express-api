@@ -1,7 +1,14 @@
 import "dotenv/config";
 import express, { Request, Response, NextFunction } from "express";
+import path from "path";
+import { fileURLToPath } from "url";
 import paystackRoutes from "./routes/paystack.js";
 import webhook from "./webhook.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+// Frontend is at root level: paystack/frontend
+const frontendPath = path.join(__dirname, "../../../frontend");
 
 const app = express();
 
@@ -24,8 +31,17 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use(express.json());
+
+// Serve static files from frontend directory
+app.use(express.static(frontendPath));
+
 app.use("/paystack", paystackRoutes);
 app.use("/webhook/paystack", webhook);
+
+// Serve frontend index.html for root route
+app.get("/", (req: Request, res: Response) => {
+  res.sendFile(path.join(frontendPath, "index.html"));
+});
 
 // Error handling middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
